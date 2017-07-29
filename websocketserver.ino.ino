@@ -17,6 +17,7 @@ const char* update_path = "/firmware";
 const char* update_username = "admin";
 const char* update_password = "admin";
 
+char AP_ssid[32]     = ""; //for AP mode ssid, visiable for all users
 
 WebSocketsServer webSocket = WebSocketsServer(81);
 
@@ -122,6 +123,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 
 void setup()
 {
+  WiFi.mode(WIFI_AP_STA);//AP and client mode
+  
+  WiFi.enableAP(false);//disable AP mode, 
+  WiFi.enableSTA(true);//enable client mode, 
+  
     // use Serial 1 for debug out
 //    Serial1.begin(921600);
 //    Serial1.setDebugOutput(true);
@@ -143,7 +149,13 @@ void setup()
     //wifiManager.resetSettings();    
         
     wifiManager.autoConnect("Emblaser2");
-
+  
+  IPAddress ip_addr = WiFi.localIP();
+  String("Emblaser2 IP:"+String(ip_addr[0])+"."+String(ip_addr[1])+"."+String(ip_addr[2])+"."+String(ip_addr[3])).toCharArray(AP_ssid, 32);
+  WiFi.enableAP(true);//enable AP to broadcast IP address to users, can be turn off again if necessary
+  delay(500);
+  WiFi.softAP(AP_ssid, "12345678");
+  
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
 
